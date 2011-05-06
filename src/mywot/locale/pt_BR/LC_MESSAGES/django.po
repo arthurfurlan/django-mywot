@@ -1,0 +1,73 @@
+# Brazilian Portuguese (pt_BR) translation file.
+#
+# Copyright (C) 2011 - Valvim Technologies
+# This file is distributed under the same license as the django-mywot package.
+#
+# Arthur Furlan <afurlan@valvim.com>, 2011.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mywot 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-05-06 12:25-0300\n"
+"PO-Revision-Date: 2011-05-06 12:27-0300\n"
+"Last-Translator: Arthur Furlan <afurlan@valvim.com>\n"
+"Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+
+#: models.py:19
+msgid "Trustworthiness"
+msgstr "Confiabilidade"
+
+#: models.py:20
+msgid "Vendor reliability"
+msgstr "Confiabilidade da Empresa"
+
+#: models.py:21
+msgid "Privacy"
+msgstr "Privacidade"
+
+#: models.py:22
+msgid "Child safety"
+msgstr "Apropriado para crianças"
+
+#: models.py:30
+msgid "Excellent"
+msgstr "Excelente"
+
+#: models.py:31
+msgid "Good"
+msgstr "Bom"
+
+#: models.py:32
+msgid "Unsatisfactory"
+msgstr "Regular"
+
+#: models.py:33
+msgid "Poor"
+msgstr "Ruim"
+
+#: models.py:34
+msgid "Very poor"
+msgstr "Péssimo"
+
+#: models.py:35
+msgid "Not rated"
+msgstr "Não avaliado"
+
+#: templates/mywot/mywot_scorecard.html:6
+msgid "Category"
+msgstr "Categoria"
+
+#: templates/mywot/mywot_scorecard.html:7
+msgid "Reputation"
+msgstr "Reputação"
+
+#: templates/mywot/mywot_scorecard.html:8
+msgid "Confidence"
+msgstr "Confiabilidade"
