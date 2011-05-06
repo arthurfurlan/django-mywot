@@ -14,39 +14,52 @@ import re
 ## number of days required to expiry the loaded values
 MYWOT_EXPIRATION_DAYS = getattr(settings, 'MYWOT_EXPIRATION_DAYS', 180)
 
-## the label of the reputation/confidence categories
-MYWOT_CATEGORY_DESCRIPTION = {
-    0: _(u'Trustworthiness'),
-    1: _(u'Vendor reliability'),
-    2: _(u'Privacy'),
-    4: _(u'Child safety'),
-}
-
 ## limits of the score value for the reputation
 MYWOT_REPUTATION_SCOREVAL = [80, 60, 40, 20, 1]
 MYWOT_REPUTATION_SCOREMAX = 5
 MYWOT_REPUTATION_SCOREMIN = 0
-MYWOT_REPUTATION_SCORELBL = {
-    5: _(u'Excellent'),
-    4: _(u'Good'),
-    3: _(u'Unsatisfactory'),
-    2: _(u'Poor'),
-    1: _(u'Very poor'),
-    0: _(u'Not rated'),
-}
 
 ## limits of the score value for the confidence
 MYWOT_CONFIDENCE_SCOREVAL = [45, 34, 23, 12, 6]
 MYWOT_CONFIDENCE_SCOREMAX = 5
 MYWOT_CONFIDENCE_SCOREMIN = 0
-MYWOT_CONFIDENCE_SCORELBL = {
-    5: u'5 / 5',
-    4: u'4 / 5',
-    3: u'3 / 5',
-    2: u'2 / 5',
-    1: u'1 / 5',
-    0: u'0 / 5',
-}
+
+## label of the reputation/confidence categories
+try:
+    MYWOT_CATEGORY_DESCRIPTION = settings.MYWOT_CATEGORY_DESCRIPTION
+except AttributeError:
+    MYWOT_CATEGORY_DESCRIPTION = {
+        0: _(u'Trustworthiness'),
+        1: _(u'Vendor reliability'),
+        2: _(u'Privacy'),
+        4: _(u'Child safety'),
+    }
+
+## label of the reputation values
+try:
+    MYWOT_REPUTATION_SCORELBL = settings.MYWOT_REPUTATION_SCORELBL
+except AttributeError:
+    MYWOT_REPUTATION_SCORELBL = {
+        5: _(u'Excellent'),
+        4: _(u'Good'),
+        3: _(u'Unsatisfactory'),
+        2: _(u'Poor'),
+        1: _(u'Very poor'),
+        0: _(u'Not rated'),
+    }
+
+## label of the confidence values
+try:
+    MYWOT_CONFIDENCE_SCORELBL = settings.MYWOT_CONFIDENCE_SCORELBL
+except AttributeError:
+    MYWOT_CONFIDENCE_SCORELBL = {
+        5: u'5 / 5',
+        4: u'4 / 5',
+        3: u'3 / 5',
+        2: u'2 / 5',
+        1: u'1 / 5',
+        0: u'0 / 5',
+    }
 
 
 class DomainRequiredError(Exception):
@@ -147,7 +160,6 @@ class Target(models.Model):
         ## calculate the score of the confidence
         score = MYWOT_CONFIDENCE_SCOREMAX
         for v in MYWOT_CONFIDENCE_SCOREVAL:
-            print value, ':', v, score 
             if v <= value:
                 return score
             score -= 1
