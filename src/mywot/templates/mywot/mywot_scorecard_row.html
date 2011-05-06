@@ -1,0 +1,16 @@
+{% load i18n %}
+{% load mywot_tags %}
+
+<tr>
+    <td class="name">
+        {% mywot_category_description n %}
+    </td><td class="reputation">
+        <img src="{% mywot_reputation_score_image target n %}"
+            alt="{% mywot_reputation_score_label target n %}" />
+        {% mywot_reputation_score_label target n %}
+    </td><td class="confidence">
+        <img src="{% mywot_confidence_score_image target n %}"
+            alt="{% mywot_confidence_score_label target n %}" />
+        {% mywot_confidence_score_label target n %}
+    </td>
+</tr>

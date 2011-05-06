@@ -1,0 +1,14 @@
+{% load i18n %}
+{% load mywot_tags %}
+
+<table class="mywot-scorecard" border="1">
+    <tr>
+        <th>{% trans "Category" %}</th>
+        <th>{% trans "Reputation" %}</th>
+        <th>{% trans "Confidence" %}</th>
+    </tr>
+    {% mywot_scorecard_row target 0 %}
+    {% mywot_scorecard_row target 1 %}
+    {% mywot_scorecard_row target 2 %}
+    {% mywot_scorecard_row target 4 %}
+</table>
