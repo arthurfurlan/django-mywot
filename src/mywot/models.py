@@ -3,14 +3,50 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
 from datetime import datetime
 from xml.dom import minidom
 from urllib2 import urlopen
+import os
 import re
 
 
 ## number of days required to expiry the loaded values
 MYWOT_EXPIRATION_DAYS = getattr(settings, 'MYWOT_EXPIRATION_DAYS', 180)
+
+## the label of the reputation/confidence categories
+MYWOT_CATEGORY_DESCRIPTION = {
+    0: _(u'Trustworthiness'),
+    1: _(u'Vendor reliability'),
+    2: _(u'Privacy'),
+    4: _(u'Child safety'),
+}
+
+## limits of the score value for the reputation
+MYWOT_REPUTATION_SCOREVAL = [80, 60, 40, 20, 1]
+MYWOT_REPUTATION_SCOREMAX = 5
+MYWOT_REPUTATION_SCOREMIN = 0
+MYWOT_REPUTATION_SCORELBL = {
+    5: _(u'Excellent'),
+    4: _(u'Good'),
+    3: _(u'Unsatisfactory'),
+    2: _(u'Poor'),
+    1: _(u'Very poor'),
+    0: _(u'Not rated'),
+}
+
+## limits of the score value for the confidence
+MYWOT_CONFIDENCE_SCOREVAL = [45, 34, 23, 12, 6]
+MYWOT_CONFIDENCE_SCOREMAX = 5
+MYWOT_CONFIDENCE_SCOREMIN = 0
+MYWOT_CONFIDENCE_SCORELBL = {
+    5: u'5 / 5',
+    4: u'4 / 5',
+    3: u'3 / 5',
+    2: u'2 / 5',
+    1: u'1 / 5',
+    0: u'0 / 5',
+}
 
 
 class DomainRequiredError(Exception):
@@ -23,16 +59,16 @@ class Target(models.Model):
     last_update = models.DateTimeField(auto_now=True)
 
     ## reputation values
-    reputation_0 = models.IntegerField(u'Trustworthiness', blank=True, null=True)
-    reputation_1 = models.IntegerField(u'Vendor reliability', blank=True, null=True)
-    reputation_2 = models.IntegerField(u'Privacy', blank=True, null=True)
-    reputation_4 = models.IntegerField(u'Child safety', blank=True, null=True)
+    reputation_0 = models.IntegerField(MYWOT_CATEGORY_DESCRIPTION[0], blank=True, null=True)
+    reputation_1 = models.IntegerField(MYWOT_CATEGORY_DESCRIPTION[1], blank=True, null=True)
+    reputation_2 = models.IntegerField(MYWOT_CATEGORY_DESCRIPTION[2], blank=True, null=True)
+    reputation_4 = models.IntegerField(MYWOT_CATEGORY_DESCRIPTION[4], blank=True, null=True)
 
     ## confidence of the reputation values
-    confidence_0 = models.IntegerField(u'Confidence of "Trustworthiness"', blank=True, null=True)
-    confidence_1 = models.IntegerField(u'Confidence of "Vendor reliability"', blank=True, null=True)
-    confidence_2 = models.IntegerField(u'Confidence of "Privacy"', blank=True, null=True)
-    confidence_4 = models.IntegerField(u'Confidence of "Child safety"', blank=True, null=True)
+    confidence_0 = models.IntegerField(u'Confidence of ' + MYWOT_CATEGORY_DESCRIPTION[0], blank=True, null=True)
+    confidence_1 = models.IntegerField(u'Confidence of ' + MYWOT_CATEGORY_DESCRIPTION[1], blank=True, null=True)
+    confidence_2 = models.IntegerField(u'Confidence of ' + MYWOT_CATEGORY_DESCRIPTION[2], blank=True, null=True)
+    confidence_4 = models.IntegerField(u'Confidence of ' + MYWOT_CATEGORY_DESCRIPTION[4], blank=True, null=True)
 
     ## url of the mywot's api
     MYWOT_API = ' http://api.mywot.com/0.4/public_query2?target=%s'
@@ -80,6 +116,76 @@ class Target(models.Model):
         u''' Return the url of the MyWOT's api for the current domain. '''
 
         return self.MYWOT_API % self.domain
+
+
+    def get_reputation_score(self, n):
+        ''' Return the reputation score based on the thresholds of MyWOT.
+            http://www.mywot.com/wiki/API#Reputation_and_confidence '''
+
+        ## get the value of the "n" reputation
+        value = getattr(self, 'reputation_' + str(n))
+        if value is None:
+            return MYWOT_REPUTATION_SCOREMIN
+
+        ## calculate the score of the reputation
+        score = MYWOT_REPUTATION_SCOREMAX
+        for v in MYWOT_REPUTATION_SCOREVAL:
+            if v <= value:
+                return score
+            score -= 1
+        return score
+
+
+    def get_confidence_score(self, n):
+        ''' Return the confidence score based on the thresholds of MyWOT.
+            http://www.mywot.com/wiki/API#Reputation_and_confidence '''
+
+        value = getattr(self, 'confidence_' + str(n))
+        if value is None:
+            return MYWOT_CONFIDENCE_SCOREMIN
+
+        ## calculate the score of the confidence
+        score = MYWOT_CONFIDENCE_SCOREMAX
+        for v in MYWOT_CONFIDENCE_SCOREVAL:
+            print value, ':', v, score 
+            if v <= value:
+                return score
+            score -= 1
+        return score
+
+
+    def get_reputation_score_label(self, n):
+        u''' Return the lable of the specified reputation score. '''
+
+        value = self.get_reputation_score(n)
+        return MYWOT_REPUTATION_SCORELBL[value]
+
+
+    def get_confidence_score_label(self, n):
+        u''' Return the lable of the specified confidence score. '''
+
+        value = self.get_confidence_score(n)
+        return MYWOT_CONFIDENCE_SCORELBL[value]
+
+
+    def get_reputation_score_image(self, n):
+        u''' Return the image of the specified reputation score. '''
+
+        score = self.get_reputation_score(n)
+        return os.path.join(
+            settings.MEDIA_URL, 'mywot',
+            'reputation-%d.png' % score
+        )
+
+
+    def get_confidence_score_image(self, n):
+        u''' Return the image of the specified confidence score. '''
+
+        score = self.get_confidence_score(n)
+        return os.path.join(
+            settings.MEDIA_URL, 'mywot',
+            'confidence-%d.png' % score
+        )
 
 
     @staticmethod
