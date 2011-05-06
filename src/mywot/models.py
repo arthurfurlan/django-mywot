@@ -72,3 +72,17 @@ class Target(models.Model):
         u''' Return the url of the MyWOT's api for the current domain. '''
 
         return self.MYWOT_API % self.domain
+
+
+    @staticmethod
+    def get_or_create_object(domain):
+        u''' Return the existent object with the specified domain, if it doesn't exists, create it. '''
+
+        try:
+            target = Target.objects.get(domain=domain)
+        except Target.DoesNotExist:
+            target = Target(domain=domain)
+            target.load_values()
+            target.save()
+        finally:
+            return target
