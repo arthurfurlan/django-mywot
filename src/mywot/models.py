@@ -48,10 +48,6 @@ class Target(models.Model):
         else:
             raise ValidationError(u'Invalid domain name.')
 
-    def get_api_url(self):
-        u''' Return the url of the MyWOT's api for the current domain. '''
-
-        return self.MYWOT_API % self.domain
 
     def load_values(self):
         u''' Load the reputation and confidence values from MyWOT. '''
@@ -70,3 +66,9 @@ class Target(models.Model):
             n = entry.getAttribute('name')
             setattr(self, 'reputation_' + n, entry.getAttribute('r'))
             setattr(self, 'confidence_' + n, entry.getAttribute('c'))
+
+
+    def get_api_url(self):
+        u''' Return the url of the MyWOT's api for the current domain. '''
+
+        return self.MYWOT_API % self.domain
