@@ -92,6 +92,10 @@ class Target(models.Model):
         re.IGNORECASE,
     )
 
+    ## regular expressions to extract domains from urls
+    URL_PROTOCOL_RE = re.compile('^https?://')
+    URL_PATHINFO_RE = re.compile('/.*$')
+
 
     def __unicode__(self):
         return self.domain
@@ -201,8 +205,12 @@ class Target(models.Model):
 
 
     @staticmethod
-    def get_or_create_object(domain):
+    def get_or_create_object(url):
         u''' Return the existent object with the specified domain, if it doesn't exists, create it. '''
+
+        ## extract the domain from the URL
+        domain = Target.URL_PROTOCOL_RE.sub('', url)
+        domain = Target.URL_PATHINFO_RE.sub('', domain)
 
         try:
             # try to get an existent object
