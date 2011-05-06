@@ -7,21 +7,13 @@ import re
 
 register = template.Library()
 
-## regular expressions to clean up url
-URL_PROTOCOL_RE = re.compile('^https?://')
-URL_PATHINFO_RE = re.compile('/.*$')
-
 
 @register.simple_tag
 def mywot_scorecard(url):
     ''' Return the MyWOT Scorecard for the specified domain. '''
 
-    ## extract the domain from the URL
-    domain = URL_PROTOCOL_RE.sub('', url)
-    domain = URL_PATHINFO_RE.sub('', domain)
-
     ## return the mywot scorecard of the extracted domain
-    target = Target.get_or_create_object(domain)
+    target = Target.get_or_create_object(url)
     return render_to_string(
         'mywot/mywot_scorecard.html',
         { 'target':target },
@@ -86,3 +78,33 @@ def mywot_category_description(n):
     ''' Return the descriptoin of the specified category. '''
 
     return MYWOT_CATEGORY_DESCRIPTION[n]
+
+
+@register.tag
+def mywot_load_target(parser, token):
+    ''' Return the target object for the specified domain.
+        {% mywot_load_targert url as target %} '''
+
+    try:
+        tag_name, domain, _, varname = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError(
+            "%r tag requires exactly three arguments" \
+                % token.contents.split()[0]
+        )
+    return LoadTargetNode(domain, varname)
+
+class LoadTargetNode(template.Node):
+    ''' Node object for the "mywot_load_target". '''
+
+    def __init__(self, domain, varname):
+        self.varname = varname
+        self.domain = template.Variable(domain)
+    
+    def render(self, context):
+        try:
+           value = self.domain.resolve(context)
+           context[self.varname] = Target.get_or_create_object(value)
+        except template.VariableDoesNotExist:
+            pass
+        return ''
