@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from datetime import datetime
 from xml.dom import minidom
 from urllib2 import urlopen
 import re
 
+
+## number of days required to expiry the loaded values
+MYWOT_EXPIRATION_DAYS = getattr(settings, 'MYWOT_EXPIRATION_DAYS', 180)
+
+
 class DomainRequiredError(Exception):
     pass
+
 
 class Target(models.Model):
 
@@ -79,10 +87,22 @@ class Target(models.Model):
         u''' Return the existent object with the specified domain, if it doesn't exists, create it. '''
 
         try:
+            # try to get an existent object
             target = Target.objects.get(domain=domain)
+
         except Target.DoesNotExist:
+            # ... if it doesn't exist, create it
             target = Target(domain=domain)
             target.load_values()
             target.save()
+
+        else:
+            # ... if it exists, check if it's not expired
+            delta = datetime.now() - target.last_update
+            if delta.days > MYWOT_EXPIRATION_DAYS:
+                target.load_values()
+                target.save()
+
         finally:
+            #... finally, return the object
             return target
