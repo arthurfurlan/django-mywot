@@ -12,7 +12,10 @@ import re
 
 
 ## number of days required to expiry the loaded values
-MYWOT_EXPIRATION_DAYS = getattr(settings, 'MYWOT_EXPIRATION_DAYS', 180)
+try:
+    MYWOT_EXPIRATION_DAYS = settings.MYWOT_EXPIRATION_DAYS
+except AttributeError:
+    MYWOT_EXPIRATION_DAYS = 180 # six months
 
 ## user-agent header used in the HTTP connections
 try:
