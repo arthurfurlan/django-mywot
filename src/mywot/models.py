@@ -6,13 +6,19 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from datetime import datetime
 from xml.dom import minidom
-from urllib2 import urlopen
+import urllib2
 import os
 import re
 
 
 ## number of days required to expiry the loaded values
 MYWOT_EXPIRATION_DAYS = getattr(settings, 'MYWOT_EXPIRATION_DAYS', 180)
+
+## user-agent header used in the HTTP connections
+try:
+    MYWOT_HEADER_USERAGENT = settings.MYWOT_HEADER_USERAGENT
+except AttributeError:
+    MYWOT_HEADER_USERAGENT = 'django-mywot'
 
 ## limits of the score value for the reputation
 MYWOT_REPUTATION_SCOREVAL = [80, 60, 40, 20, 1]
@@ -119,7 +125,9 @@ class Target(models.Model):
 
         ## consume the mywot's webservice
         url = self.get_api_url()
-        dom = minidom.parse(urlopen(url))
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', MYWOT_HEADER_USERAGENT)
+        dom = minidom.parse(urllib2.urlopen(req))
 
         ## parse the xml data and extract the values
         query = dom.childNodes[0]
